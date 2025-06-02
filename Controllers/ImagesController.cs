@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/v1/[controller]")]
 public class ImagesController : ControllerBase
 {
-    private readonly IImagesService _imagesService;
+    private readonly IImageService _imagesService;
 
     private string UserId => User.FindFirst("user_id")?.Value ?? throw new HttpRequestException("No authorized user.", null, HttpStatusCode.Unauthorized);
 
-    public ImagesController(IImagesService imagesService)
+    public ImagesController(IImageService imagesService)
     {
         _imagesService = imagesService;
     }
@@ -19,48 +19,27 @@ public class ImagesController : ControllerBase
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         ImageMetadata imageMetadata = await _imagesService.UploadImageAsync(file, UserId);
-
         return Created($"/images/{imageMetadata.S3Key}", new { Url = _imagesService.GetImageUrl(imageMetadata.S3Key, UserId) });
     }
 
     [HttpGet("{s3Key}"), Authorize]
     public async Task<IActionResult> GetImage(string s3Key)
     {
-        try
-        {
-            ImageMetadata image = await _imagesService.GetImageMetadata(s3Key, UserId);
-            return Ok(new { Image = image });
-        }
-        catch (HttpRequestException ex)
-        {
-            return StatusCode((int?)ex.StatusCode ?? 500, new
-            {
-                error = ex.Message
-            });
-        }
+        ImageMetadata image = await _imagesService.GetImageMetadata(s3Key, UserId);
+        return Ok(new { Image = image });
     }
 
     [HttpGet("request-signed-url/{s3Key}"), Authorize]
     public async Task<IActionResult> GetImageUrl(string s3Key)
     {
-        try
-        {
-            string url = await _imagesService.GetImageUrl(s3Key, UserId);
-            return Ok(new { Url = url });
-        }
-        catch (HttpRequestException ex)
-        {
-            return StatusCode((int?)ex.StatusCode ?? 500, new
-            {
-                error = ex.Message
-            });
-        }
+        string url = await _imagesService.GetImageUrl(s3Key, UserId);
+        return Ok(new { Url = url });
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllImages()
     {
-        return Ok(await _imagesService.GetAllImages());
+        return Ok(await _imagesService.GetAllAsync());
     }
 
     [HttpGet("my"), Authorize]
