@@ -19,20 +19,20 @@ public class ImagesController : ControllerBase
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         ImageMetadata imageMetadata = await _imagesService.UploadImageAsync(file, UserId);
-        return Created($"/images/{imageMetadata.S3Key}", new { Url = _imagesService.GetImageUrl(imageMetadata.S3Key, UserId) });
+        return Created($"/images/{imageMetadata.ObjectKey}", new { Url = _imagesService.GetImageUrl(imageMetadata.ObjectKey, UserId) });
     }
 
-    [HttpGet("{s3Key}"), Authorize]
-    public async Task<IActionResult> GetImage(string s3Key)
+    [HttpGet("{objectKey}"), Authorize]
+    public async Task<IActionResult> GetImage(string objectKey)
     {
-        ImageMetadata image = await _imagesService.GetImageMetadata(s3Key, UserId);
+        ImageMetadata image = await _imagesService.GetImageMetadata(objectKey, UserId);
         return Ok(new { Image = image });
     }
 
-    [HttpGet("request-signed-url/{s3Key}"), Authorize]
-    public async Task<IActionResult> GetImageUrl(string s3Key)
+    [HttpGet("request-signed-url/{objectKey}"), Authorize]
+    public async Task<IActionResult> GetImageUrl(string objectKey)
     {
-        string url = await _imagesService.GetImageUrl(s3Key, UserId);
+        string url = await _imagesService.GetImageUrl(objectKey, UserId);
         return Ok(new { Url = url });
     }
 
@@ -48,10 +48,10 @@ public class ImagesController : ControllerBase
         return Ok(await _imagesService.GetImagesByUserId(UserId));
     }
 
-    [HttpDelete("delete/{s3Key}"), Authorize]
-    public async Task<IActionResult> DeleteImage(string s3Key)
+    [HttpDelete("delete/{objectKey}"), Authorize]
+    public async Task<IActionResult> DeleteImage(string objectKey)
     {
-        bool deleted = await _imagesService.DeleteImageAsync(s3Key, UserId);
+        bool deleted = await _imagesService.DeleteImageAsync(objectKey, UserId);
         return NoContent();
     }
 }

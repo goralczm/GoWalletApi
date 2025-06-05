@@ -32,7 +32,7 @@ public class ImageRepository : IImageRepository
 
     public async Task<ImageMetadata> GetImageMetadata(string s3Key, string userId)
     {
-        var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.S3Key == s3Key);
+        var image = await _dbContext.Images.FirstOrDefaultAsync(i => i.ObjectKey == s3Key);
         if (image == null)
             throw new HttpRequestException("Image not found.", null, HttpStatusCode.NotFound);
 

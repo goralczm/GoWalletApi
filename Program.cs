@@ -55,6 +55,7 @@ builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
+builder.Services.AddScoped<AWSFileHandler>();
 
 var app = builder.Build();
 
@@ -73,5 +74,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapControllers();
-app.MapGet("/api/health", () => Results.Ok("Images Service is healty"));
+app.MapGet("/api/v1/health", () => Results.Ok("Images Service is healty"));
 app.Run();
